@@ -3,7 +3,7 @@ import { Card, CardContent } from "./ui/card";
 import { formatDistanceStrict } from "date-fns";
 import { Button } from "./ui/button";
 import { useMutation } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Utensils } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -17,9 +17,11 @@ export function TimerDisplay({ lastMealTime }: TimerDisplayProps) {
 
   const logMeal = useMutation({
     mutationFn: async () => {
-      await apiRequest("POST", "/api/meals", {});
+      const res = await apiRequest("POST", "/api/meals", {});
+      return res.json();
     },
-    onSuccess: () => {
+    onSuccess: (newMeal) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/meals"] });
       toast({
         title: "Meal logged successfully",
         description: "Your meal has been recorded",
